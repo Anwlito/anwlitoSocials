@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,7 +7,6 @@
 <title>Anwlito Web</title>
 
 <style>
-
 @font-face{
   font-family:"AnwFont";
   src:url("fuente.ttf");
@@ -24,7 +24,6 @@ body{
   font-family:Arial;
 }
 
-/* 🌅 FONDO */
 #fondo{
   position:fixed;
   width:100vw;
@@ -34,7 +33,6 @@ body{
   transition:1s;
 }
 
-/* 👤 ICONO */
 #icono{
   position:absolute;
   right:0;
@@ -44,7 +42,6 @@ body{
   transition:1s;
 }
 
-/* 🔗 BOTONES */
 .botones{
   position:absolute;
   inset:0;
@@ -67,7 +64,6 @@ body{
   transform:scale(1.2);
 }
 
-/* 📺 BOTÓN VIDEO */
 .videoBtn{
   font-size:70px;
   cursor:pointer;
@@ -79,7 +75,6 @@ body{
   transform:scale(1.2);
 }
 
-/* 🎮 START */
 #startScreen{
   position:fixed;
   inset:0;
@@ -109,7 +104,6 @@ body{
   100%{opacity:1;}
 }
 
-/* 🌌 SHADER */
 body::before{
   content:"";
   position:fixed;
@@ -120,73 +114,60 @@ body::before{
   mix-blend-mode:screen;
   pointer-events:none;
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- 🎮 START -->
 <div id="startScreen">
-  <img src="start.png">
+  <img src="start.png" alt="">
   <p class="startText">PRESIONA LA PANTALLA PARA EMPEZAR</p>
 </div>
 
-<!-- 🎵 MUSICA -->
 <audio id="bgm" loop>
-  <source src="music.mp3">
+  <source src="music.mp3" type="audio/mpeg">
 </audio>
 
-<!-- 🌅 FONDO -->
-<img id="fondo" src="fondo.png">
+<img id="fondo" src="fondo.png" alt="">
+<img id="icono" src="anwlitoicon.png" alt="">
 
-<!-- 👤 ICONO -->
-<img id="icono" src="anwlitoicon.png">
-
-<!-- 🔗 BOTONES -->
 <div class="botones">
 
-  <!-- 📺 BOTÓN DIRECTO -->
   <div class="videoBtn" onclick="openPlaylist()">📺</div>
 
-  <a href="https://anwlitoc.carrd.co/" target="_blank">
-    <img src="yt2.png">
+  <a href="https://anwlitoc.carrd.co/" target="_blank" rel="noopener">
+    <img src="yt2.png" alt="YouTube">
   </a>
 
-  <a href="https://www.tiktok.com/@eliot_friend_anwlito" target="_blank">
-    <img src="tiktok2.png">
+  <a href="https://www.tiktok.com/@eliot_friend_anwlito" target="_blank" rel="noopener">
+    <img src="tiktok2.png" alt="TikTok">
   </a>
 
-  <a href="https://x.com/SoyAnwlitoyt" target="_blank">
-    <img src="Twitter.png">
+  <a href="https://x.com/SoyAnwlitoyt" target="_blank" rel="noopener">
+    <img src="Twitter.png" alt="Twitter">
   </a>
 
-  <a href="https://discord.gg/YBnPcpTxqF" target="_blank">
-    <img src="Discord.png">
+  <a href="https://discord.gg/YBnPcpTxqF" target="_blank" rel="noopener">
+    <img src="Discord.png" alt="Discord">
   </a>
 
 </div>
 
 <script>
-
-/* 🎮 START */
 document.getElementById("startScreen").onclick = () => {
+  document.getElementById("startScreen").style.display = "none";
 
-  document.getElementById("startScreen").style.display="none";
+  document.getElementById("fondo").style.opacity = "1";
+  document.getElementById("icono").style.opacity = "1";
+  document.querySelector(".botones").style.opacity = "1";
 
-  document.getElementById("fondo").style.opacity="1";
-  document.getElementById("icono").style.opacity="1";
-  document.querySelector(".botones").style.opacity="1";
-
-  document.getElementById("bgm").play().catch(()=>{});
+  document.getElementById("bgm").play().catch(() => {});
 };
 
-/* 📺 FIX REAL: ABRE EN MISMA PESTAÑA */
 function openPlaylist(){
   location.href = "https://youtube.com/playlist?list=PLBb0DKDUmZDg&si=EIDTzMlS_kKOpae6";
 }
-
 </script>
 
 </body>
-      </html>
+</html>
