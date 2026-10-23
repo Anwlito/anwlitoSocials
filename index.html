@@ -82,26 +82,31 @@ body{
   transform:scale(1.2);
 }
 
-/* Imagen estática de ModsOpti */
-.enterLink{
-  position:absolute;
-  top:20px;
-  left:20px;
-  z-index:5;
-  display:block;
-  width:clamp(90px,14vw,180px);
+/* Botón animado de ModsOpti */
+#modOptiButton{
+  position:fixed;
+  top:15px;
+  right:15px;
+  z-index:20;
+  width:clamp(48px,7vw,80px);
+  aspect-ratio:1;
   cursor:pointer;
-  transition:transform 0.2s;
+  background:transparent;
+  border:0;
+  padding:0;
+  display:grid;
+  place-items:center;
 }
 
-.enterLink img{
-  display:block;
+#modOptiButton canvas{
   width:100%;
-  height:auto;
+  height:100%;
+  image-rendering:auto;
 }
 
-.enterLink:hover{
-  transform:scale(1.06);
+#modOptiButton:focus-visible{
+  outline:2px solid cyan;
+  outline-offset:4px;
 }
 
 #startScreen{
@@ -147,23 +152,9 @@ body::before{
 }
 
 @media (max-width:600px){
-  .botones{
-    gap:18px;
-  }
-
-  .botones img{
-    height:12vh;
-  }
-
-  .videoBtn{
-    font-size:48px;
-  }
-
-  .enterLink{
-    top:12px;
-    left:12px;
-    width:100px;
-  }
+  .botones{gap:18px;}
+  .botones img{height:12vh;}
+  .videoBtn{font-size:48px;}
 }
 </style>
 </head>
@@ -175,22 +166,18 @@ body::before{
   <p class="startText">PRESIONA LA PANTALLA PARA EMPEZAR</p>
 </div>
 
-<audio id="bgm" loop>
-  <source src="music.mp3" type="audio/mpeg">
-</audio>
+<audio id="bgm" src="music.mp3" loop></audio>
 
 <img id="fondo" src="fondo.png" alt="">
 <img id="icono" src="anwlitoicon.png" alt="">
 
-<!-- Imagen estática que abre ModsOpti -->
-<a class="enterLink"
-   href="https://anwlito.github.io/ModsOpti/"
-   aria-label="Entrar a ModsOpti">
-  <img src="Enter.png" alt="ModsOpti">
-</a>
+<button id="modOptiButton"
+        type="button"
+        aria-label="Entrar a ModsOpti">
+  <canvas id="checkboxCanvas"></canvas>
+</button>
 
 <div class="botones">
-
   <div class="videoBtn" onclick="openPlaylist()">📺</div>
 
   <a href="https://anwlitoc.carrd.co/" target="_blank" rel="noopener">
@@ -206,20 +193,18 @@ body::before{
     <img src="Twitter.png" alt="Twitter">
   </a>
 
-  <a href="https://discord.gg/YBnPcpTxqF" target="_blank" rel="noopener">
+  <a href="https://discord.gg/YBnPcpTxqF"
+     target="_blank" rel="noopener">
     <img src="Discord.png" alt="Discord">
   </a>
-
 </div>
 
 <script>
 document.getElementById("startScreen").onclick = () => {
   document.getElementById("startScreen").style.display = "none";
-
   document.getElementById("fondo").style.opacity = "1";
   document.getElementById("icono").style.opacity = "1";
   document.querySelector(".botones").style.opacity = "1";
-
   document.getElementById("bgm").play().catch(() => {});
 };
 
@@ -227,6 +212,185 @@ function openPlaylist(){
   location.href =
     "https://youtube.com/playlist?list=PLBb0DKDUmZDg&si=EIDTzMlS_kKOpae6";
 }
+
+/* Animación del botón desde el XML */
+(() => {
+  const image = new Image();
+  image.src = "checkboxThingie.png";
+
+  const canvas = document.getElementById("checkboxCanvas");
+  const ctx = canvas.getContext("2d");
+  const button = document.getElementById("modOptiButton");
+
+  const xmlPath = "checkboxThingie.xml";
+  const staticName = "Check Box Selected Static";
+  const selectName = "Check Box selecting animation";
+
+  let frames = {};
+  let currentFrames = [];
+  let frameIndex = 0;
+  let lastTime = 0;
+  let playing = false;
+  let redirectTimer = null;
+  let frameDuration = 1000 / 24;
+
+  function getFrameName(name){
+    return name.replace(/\.png$/i, "");
+  }
+
+  function findAnimation(prefix){
+    return Object.keys(frames)
+      .filter(name => name === prefix ||
+        name.startsWith(prefix))
+      .sort((a,b) => {
+        const getNumber = name => {
+          const match = name.match(/(\d+)(?!.*\d)/);
+          return match ? Number(match[1]) : 0;
+        };
+        return getNumber(a) - getNumber(b);
+      })
+      .map(name => frames[name]);
+  }
+
+  function drawFrame(){
+    if(!image.complete || !image.naturalWidth ||
+       !currentFrames.length) return;
+
+    const frame = currentFrames[
+      Math.min(frameIndex, currentFrames.length - 1)
+    ];
+
+    if(!frame) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+
+    if(!rect.width || !rect.height) return;
+
+    const targetWidth = Math.round(rect.width * dpr);
+    const targetHeight = Math.round(rect.height * dpr);
+
+    if(canvas.width !== targetWidth ||
+       canvas.height !== targetHeight){
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+    }
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    const scale = Math.min(
+      canvas.width / frame.width,
+      canvas.height / frame.height
+    );
+
+    const width = frame.width * scale;
+    const height = frame.height * scale;
+    const x = (canvas.width - width) / 2;
+    const y = (canvas.height - height) / 2;
+
+    ctx.drawImage(
+      image,
+      frame.x, frame.y, frame.width, frame.height,
+      x, y, width, height
+    );
+  }
+
+  function playStatic(){
+    currentFrames = findAnimation(staticName);
+
+    if(!currentFrames.length){
+      console.error("No se encontró la animación:", staticName);
+      return;
+    }
+
+    frameIndex = 0;
+    playing = false;
+    drawFrame();
+  }
+
+  function animate(time){
+    if(playing && currentFrames.length){
+      if(!lastTime) lastTime = time;
+
+      if(time - lastTime >= frameDuration){
+        const steps = Math.floor((time - lastTime) / frameDuration);
+        lastTime += steps * frameDuration;
+        frameIndex += steps;
+
+        if(frameIndex >= currentFrames.length){
+          frameIndex = currentFrames.length - 1;
+          playing = false;
+        }
+
+        drawFrame();
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  fetch(xmlPath)
+    .then(response => {
+      if(!response.ok) throw new Error("No se pudo cargar el XML");
+      return response.text();
+    })
+    .then(xmlText => {
+      const xml = new DOMParser().parseFromString(
+        xmlText, "application/xml"
+      );
+
+      if(xml.querySelector("parsererror")){
+        throw new Error("El XML no es válido");
+      }
+
+      xml.querySelectorAll("SubTexture").forEach(node => {
+        const name = getFrameName(node.getAttribute("name") || "");
+
+        frames[name] = {
+          x: Number(node.getAttribute("x")),
+          y: Number(node.getAttribute("y")),
+          width: Number(node.getAttribute("width")),
+          height: Number(node.getAttribute("height"))
+        };
+      });
+
+      image.onload = () => {
+        playStatic();
+        requestAnimationFrame(animate);
+      };
+
+      if(image.complete && image.naturalWidth){
+        playStatic();
+        requestAnimationFrame(animate);
+      }
+    })
+    .catch(error => console.error(error));
+
+  button.addEventListener("click", () => {
+    if(playing || redirectTimer) return;
+
+    const selectionFrames = findAnimation(selectName);
+
+    if(!selectionFrames.length){
+      location.href = "https://anwlito.github.io/anwlitoSocials/";
+      return;
+    }
+
+    currentFrames = selectionFrames;
+    frameIndex = 0;
+    lastTime = 0;
+    playing = true;
+
+    drawFrame();
+
+    const audio = new Audio("BackSound.mp3");
+    audio.play().catch(() => {});
+
+    redirectTimer = setTimeout(() => {
+      location.href = "https://anwlito.github.io/anwlitoSocials/";
+    }, currentFrames.length * frameDuration + 100);
+  });
+})();
 </script>
 
 </body>
