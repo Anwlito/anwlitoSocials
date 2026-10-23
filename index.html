@@ -82,7 +82,7 @@ body{
   transform:scale(1.2);
 }
 
-/* Botón animado de ModsOpti */
+/* Botón de ModsOpti */
 #modOptiButton{
   position:fixed;
   top:15px;
@@ -99,9 +99,9 @@ body{
 }
 
 #modOptiButton canvas{
+  display:block;
   width:100%;
   height:100%;
-  image-rendering:auto;
 }
 
 #modOptiButton:focus-visible{
@@ -151,10 +151,18 @@ body::before{
   z-index:4;
 }
 
-@media (max-width:600px){
-  .botones{gap:18px;}
-  .botones img{height:12vh;}
-  .videoBtn{font-size:48px;}
+@media(max-width:600px){
+  .botones{
+    gap:18px;
+  }
+
+  .botones img{
+    height:12vh;
+  }
+
+  .videoBtn{
+    font-size:48px;
+  }
 }
 </style>
 </head>
@@ -166,18 +174,18 @@ body::before{
   <p class="startText">PRESIONA LA PANTALLA PARA EMPEZAR</p>
 </div>
 
-<audio id="bgm" src="music.mp3" loop></audio>
+<audio id="bgm" src="Music.mp3" loop></audio>
 
 <img id="fondo" src="fondo.png" alt="">
 <img id="icono" src="anwlitoicon.png" alt="">
 
-<button id="modOptiButton"
-        type="button"
-        aria-label="Entrar a ModsOpti">
+<button id="modOptiButton" type="button"
+        aria-label="Abrir ModsOpti">
   <canvas id="checkboxCanvas"></canvas>
 </button>
 
 <div class="botones">
+
   <div class="videoBtn" onclick="openPlaylist()">📺</div>
 
   <a href="https://anwlitoc.carrd.co/" target="_blank" rel="noopener">
@@ -197,57 +205,59 @@ body::before{
      target="_blank" rel="noopener">
     <img src="Discord.png" alt="Discord">
   </a>
+
 </div>
 
 <script>
+/* Pantalla inicial */
 document.getElementById("startScreen").onclick = () => {
   document.getElementById("startScreen").style.display = "none";
+
   document.getElementById("fondo").style.opacity = "1";
   document.getElementById("icono").style.opacity = "1";
   document.querySelector(".botones").style.opacity = "1";
+
   document.getElementById("bgm").play().catch(() => {});
 };
 
+/* Playlist */
 function openPlaylist(){
   location.href =
     "https://youtube.com/playlist?list=PLBb0DKDUmZDg&si=EIDTzMlS_kKOpae6";
 }
 
-/* Animación del botón desde el XML */
+/* Animación del botón usando el XML */
 (() => {
-  const image = new Image();
-  image.src = "checkboxThingie.png";
-
   const canvas = document.getElementById("checkboxCanvas");
   const ctx = canvas.getContext("2d");
   const button = document.getElementById("modOptiButton");
 
-  const xmlPath = "checkboxThingie.xml";
-  const staticName = "Check Box Selected Static";
-  const selectName = "Check Box selecting animation";
+  const image = new Image();
+  image.src = "checkboxThingie.png";
+
+  const STATIC_ANIM = "Check Box Selected Static";
+  const SELECT_ANIM = "Check Box selecting animation";
+  const MODSOPTI_URL = "https://anwlito.github.io/ModsOpti/";
 
   let frames = {};
+  let staticFrames = [];
+  let selectFrames = [];
   let currentFrames = [];
   let frameIndex = 0;
-  let lastTime = 0;
   let playing = false;
+  let lastTime = 0;
   let redirectTimer = null;
-  let frameDuration = 1000 / 24;
+  const frameDuration = 1000 / 24;
 
-  function getFrameName(name){
-    return name.replace(/\.png$/i, "");
-  }
-
-  function findAnimation(prefix){
+  function getAnimationFrames(prefix){
     return Object.keys(frames)
-      .filter(name => name === prefix ||
-        name.startsWith(prefix))
+      .filter(name => name === prefix || name.startsWith(prefix))
       .sort((a,b) => {
-        const getNumber = name => {
+        const number = name => {
           const match = name.match(/(\d+)(?!.*\d)/);
           return match ? Number(match[1]) : 0;
         };
-        return getNumber(a) - getNumber(b);
+        return number(a) - number(b);
       })
       .map(name => frames[name]);
   }
@@ -257,23 +267,22 @@ function openPlaylist(){
        !currentFrames.length) return;
 
     const frame = currentFrames[
-      Math.min(frameIndex, currentFrames.length - 1)
+      Math.min(frameIndex,currentFrames.length - 1)
     ];
 
     if(!frame) return;
 
-    const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
 
     if(!rect.width || !rect.height) return;
 
-    const targetWidth = Math.round(rect.width * dpr);
-    const targetHeight = Math.round(rect.height * dpr);
+    const widthPx = Math.round(rect.width * dpr);
+    const heightPx = Math.round(rect.height * dpr);
 
-    if(canvas.width !== targetWidth ||
-       canvas.height !== targetHeight){
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
+    if(canvas.width !== widthPx || canvas.height !== heightPx){
+      canvas.width = widthPx;
+      canvas.height = heightPx;
     }
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -283,26 +292,20 @@ function openPlaylist(){
       canvas.height / frame.height
     );
 
-    const width = frame.width * scale;
-    const height = frame.height * scale;
-    const x = (canvas.width - width) / 2;
-    const y = (canvas.height - height) / 2;
+    const drawWidth = frame.width * scale;
+    const drawHeight = frame.height * scale;
+    const x = (canvas.width - drawWidth) / 2;
+    const y = (canvas.height - drawHeight) / 2;
 
     ctx.drawImage(
       image,
-      frame.x, frame.y, frame.width, frame.height,
-      x, y, width, height
+      frame.x,frame.y,frame.width,frame.height,
+      x,y,drawWidth,drawHeight
     );
   }
 
-  function playStatic(){
-    currentFrames = findAnimation(staticName);
-
-    if(!currentFrames.length){
-      console.error("No se encontró la animación:", staticName);
-      return;
-    }
-
+  function showStatic(){
+    currentFrames = staticFrames;
     frameIndex = 0;
     playing = false;
     drawFrame();
@@ -323,73 +326,89 @@ function openPlaylist(){
         }
 
         drawFrame();
+
+        if(!playing && redirectTimer === null){
+          redirectTimer = setTimeout(() => {
+            location.href = MODSOPTI_URL;
+          },100);
+        }
       }
     }
 
     requestAnimationFrame(animate);
   }
 
-  fetch(xmlPath)
-    .then(response => {
-      if(!response.ok) throw new Error("No se pudo cargar el XML");
-      return response.text();
-    })
-    .then(xmlText => {
-      const xml = new DOMParser().parseFromString(
-        xmlText, "application/xml"
-      );
+  function loadXML(){
+    fetch("checkboxThingie.xml")
+      .then(response => {
+        if(!response.ok) throw new Error("No se pudo cargar el XML");
+        return response.text();
+      })
+      .then(text => {
+        const xml = new DOMParser().parseFromString(
+          text,"application/xml"
+        );
 
-      if(xml.querySelector("parsererror")){
-        throw new Error("El XML no es válido");
-      }
+        if(xml.querySelector("parsererror")){
+          throw new Error("El XML no es válido");
+        }
 
-      xml.querySelectorAll("SubTexture").forEach(node => {
-        const name = getFrameName(node.getAttribute("name") || "");
+        xml.querySelectorAll("SubTexture").forEach(node => {
+          const name = node.getAttribute("name") || "";
 
-        frames[name] = {
-          x: Number(node.getAttribute("x")),
-          y: Number(node.getAttribute("y")),
-          width: Number(node.getAttribute("width")),
-          height: Number(node.getAttribute("height"))
+          frames[name] = {
+            x:Number(node.getAttribute("x")),
+            y:Number(node.getAttribute("y")),
+            width:Number(node.getAttribute("width")),
+            height:Number(node.getAttribute("height"))
+          };
+        });
+
+        staticFrames = getAnimationFrames(STATIC_ANIM);
+        selectFrames = getAnimationFrames(SELECT_ANIM);
+
+        if(!staticFrames.length){
+          console.error("No se encontró:",STATIC_ANIM);
+          return;
+        }
+
+        image.onload = () => {
+          showStatic();
+          requestAnimationFrame(animate);
         };
-      });
 
-      image.onload = () => {
-        playStatic();
-        requestAnimationFrame(animate);
-      };
+        if(image.complete && image.naturalWidth){
+          showStatic();
+          requestAnimationFrame(animate);
+        }
+      })
+      .catch(error => console.error("Checkbox:",error));
+  }
 
-      if(image.complete && image.naturalWidth){
-        playStatic();
-        requestAnimationFrame(animate);
-      }
-    })
-    .catch(error => console.error(error));
+  button.addEventListener("click",() => {
+    if(playing || redirectTimer !== null) return;
 
-  button.addEventListener("click", () => {
-    if(playing || redirectTimer) return;
-
-    const selectionFrames = findAnimation(selectName);
-
-    if(!selectionFrames.length){
-      location.href = "https://anwlito.github.io/anwlitoSocials/";
+    /* Si no hay animación de selección, abre ModsOpti igualmente */
+    if(!selectFrames.length){
+      location.href = MODSOPTI_URL;
       return;
     }
 
-    currentFrames = selectionFrames;
+    currentFrames = selectFrames;
     frameIndex = 0;
     lastTime = 0;
     playing = true;
-
     drawFrame();
 
-    const audio = new Audio("BackSound.mp3");
-    audio.play().catch(() => {});
-
-    redirectTimer = setTimeout(() => {
-      location.href = "https://anwlito.github.io/anwlitoSocials/";
-    }, currentFrames.length * frameDuration + 100);
+    const sound = new Audio("Enter.mp3");
+    sound.play().catch(() => {});
   });
+
+  image.onerror = () => {
+    console.error("No se pudo cargar checkboxThingie.png");
+  };
+
+  loadXML();
 })();
 </script>
 
