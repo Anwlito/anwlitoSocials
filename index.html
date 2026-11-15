@@ -4,7 +4,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Anwlito Socials</title>
+
+<link rel="icon" type="image/png" href="PaginaIcon.png">
+<link rel="shortcut icon" href="PaginaIcon.png">
+<link rel="apple-touch-icon" href="PaginaIcon.png">
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Anwlito Socials">
 
 <style>
 @font-face{
@@ -82,7 +93,6 @@ body{
   transform:scale(1.2);
 }
 
-/* Botón de ModsOpti */
 #modOptiButton{
   position:fixed;
   top:15px;
@@ -179,8 +189,7 @@ body::before{
 <img id="fondo" src="fondo.png" alt="">
 <img id="icono" src="anwlitoicon.png" alt="">
 
-<button id="modOptiButton" type="button"
-        aria-label="Abrir ModsOpti">
+<button id="modOptiButton" type="button" aria-label="Abrir ModsOpti">
   <canvas id="checkboxCanvas"></canvas>
 </button>
 
@@ -192,8 +201,7 @@ body::before{
     <img src="yt2.png" alt="YouTube">
   </a>
 
-  <a href="https://www.tiktok.com/@eliot_friend_anwlito"
-     target="_blank" rel="noopener">
+  <a href="https://www.tiktok.com/@eliot_friend_anwlito" target="_blank" rel="noopener">
     <img src="tiktok2.png" alt="TikTok">
   </a>
 
@@ -201,15 +209,13 @@ body::before{
     <img src="Twitter.png" alt="Twitter">
   </a>
 
-  <a href="https://discord.gg/YBnPcpTxqF"
-     target="_blank" rel="noopener">
+  <a href="https://discord.gg/YBnPcpTxqF" target="_blank" rel="noopener">
     <img src="Discord.png" alt="Discord">
   </a>
 
 </div>
 
 <script>
-/* Pantalla inicial */
 document.getElementById("startScreen").onclick = () => {
   document.getElementById("startScreen").style.display = "none";
 
@@ -220,20 +226,16 @@ document.getElementById("startScreen").onclick = () => {
   document.getElementById("bgm").play().catch(() => {});
 };
 
-/* Playlist */
 function openPlaylist(){
-  location.href =
-    "https://youtube.com/playlist?list=PLBb0DKDUmZDg&si=EIDTzMlS_kKOpae6";
+  location.href = "https://youtube.com/playlist?list=PLBb0DKDUmZDg&si=EIDTzMlS_kKOpae6";
 }
 
-/* Animación del botón usando el XML */
 (() => {
   const canvas = document.getElementById("checkboxCanvas");
   const ctx = canvas.getContext("2d");
   const button = document.getElementById("modOptiButton");
 
   const image = new Image();
-  image.src = "checkboxThingie.png";
 
   const STATIC_ANIM = "Check Box Selected Static";
   const SELECT_ANIM = "Check Box selecting animation";
@@ -247,6 +249,7 @@ function openPlaylist(){
   let playing = false;
   let lastTime = 0;
   let redirectTimer = null;
+
   const frameDuration = 1000 / 24;
 
   function getAnimationFrames(prefix){
@@ -263,12 +266,9 @@ function openPlaylist(){
   }
 
   function drawFrame(){
-    if(!image.complete || !image.naturalWidth ||
-       !currentFrames.length) return;
+    if(!image.complete || !image.naturalWidth || !currentFrames.length) return;
 
-    const frame = currentFrames[
-      Math.min(frameIndex,currentFrames.length - 1)
-    ];
+    const frame = currentFrames[Math.min(frameIndex,currentFrames.length - 1)];
 
     if(!frame) return;
 
@@ -294,6 +294,7 @@ function openPlaylist(){
 
     const drawWidth = frame.width * scale;
     const drawHeight = frame.height * scale;
+
     const x = (canvas.width - drawWidth) / 2;
     const y = (canvas.height - drawHeight) / 2;
 
@@ -317,6 +318,7 @@ function openPlaylist(){
 
       if(time - lastTime >= frameDuration){
         const steps = Math.floor((time - lastTime) / frameDuration);
+
         lastTime += steps * frameDuration;
         frameIndex += steps;
 
@@ -344,10 +346,8 @@ function openPlaylist(){
         if(!response.ok) throw new Error("No se pudo cargar el XML");
         return response.text();
       })
-      .then(text => {
-        const xml = new DOMParser().parseFromString(
-          text,"application/xml"
-        );
+      .then(xmlText => {
+        const xml = new DOMParser().parseFromString(xmlText,"application/xml");
 
         if(xml.querySelector("parsererror")){
           throw new Error("El XML no es válido");
@@ -377,6 +377,8 @@ function openPlaylist(){
           requestAnimationFrame(animate);
         };
 
+        image.src = "checkboxThingie.png";
+
         if(image.complete && image.naturalWidth){
           showStatic();
           requestAnimationFrame(animate);
@@ -388,7 +390,6 @@ function openPlaylist(){
   button.addEventListener("click",() => {
     if(playing || redirectTimer !== null) return;
 
-    /* Si no hay animación de selección, abre ModsOpti igualmente */
     if(!selectFrames.length){
       location.href = MODSOPTI_URL;
       return;
@@ -398,6 +399,7 @@ function openPlaylist(){
     frameIndex = 0;
     lastTime = 0;
     playing = true;
+
     drawFrame();
 
     const sound = new Audio("Enter.mp3");
@@ -413,4 +415,5 @@ function openPlaylist(){
 </script>
 
 </body>
-</html>
+  </html>
+  
